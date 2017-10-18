@@ -1,7 +1,7 @@
 # docker-swarm-ipdict
 
 ## Dependency
-pip install docker[tls] webpy cachetools
+pip install docker[tls] bottle cachetools
 
 ## Usage
 
