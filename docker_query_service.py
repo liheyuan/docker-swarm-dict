@@ -25,8 +25,21 @@ class DockerQueryService:
         return taskList
 
     # [(nodeID, nodeName, nodeIP)]
+    def extract_node_info(self, node):
+        return (node.id, node.attrs.get("Description", {}).get("Hostname", ""), node.attrs.get("Status", {}).get("Addr", ""))
+
+    # [(nodeID, nodeName, nodeIP)]
     def list_nodes(self):
-        return [(node.id, node.attrs.get("Description", {}).get("Hostname", ""), node.attrs.get("Status", {}).get("Addr", "")) for node in self.sm_client.nodes.list()]
+        return [self.extract_node_info(node) for node in self.sm_client.nodes.list()]
+
+    # (nodeID, nodeName, nodeIP)
+    def get_node(self, node_id):
+        node = self.sm_client.nodes.get(node_id)
+        return self.extract_node_info(node) 
+
+    # [(nodeID, nodeName, nodeIP)]
+    def extract_container_info(self, attrs):
+        return (attrs.get("Id", ""), attrs.get("Config", {}).get("Hostname", ""), [x for x in get_recursively(attrs, "IPAddress") if len(x) > 0])
 
     # [(containerID, hostname, [ip_list])]
     def get_containers(self, node_name, node_ip):
@@ -34,7 +47,19 @@ class DockerQueryService:
         node_client = DockerClientHelper.get_client(node_name, node_ip)
         for container in node_client.containers.list():
             attrs = container.attrs
-            containerList.append((attrs.get("Id", ""), attrs.get("Config", {}).get("Hostname", ""), [x for x in get_recursively(attrs, "IPAddress") if len(x) > 0]))
+            containerList.append(self.extract_container_info(attrs))
+        return containerList
+
+    # [(containerID, hostname, [ip_list])]
+    def get_containers_by_node_id(self, node_id):
+        containerList = []
+        node = self.get_node(node_id)
+        node_name = node[1]
+        node_ip = node[2]
+        node_client = DockerClientHelper.get_client(node_name, node_ip)
+        for container in node_client.containers.list():
+            attrs = container.attrs
+            containerList.append(self.extract_container_info(attrs))
         return containerList
 
     # [(containerID, hostname, [ip_list])]
