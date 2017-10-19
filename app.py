@@ -19,8 +19,11 @@ def cache_exec(key, func, extraArgs):
         cache[key] = val
         return val
 
+def wrap_container(c):
+    return {"containerID": c[0], "hostname": c[1], "ipList": c[2]}
+
 def container_list_raw():
-    return wrap_json([{"containerID": c[0], "hostname": c[1], "ipList": c[2]} for c in dqs.list_containers()])
+    return wrap_json([wrap_container(c) for c in dqs.list_containers()])
 
 @route('/container/list')
 def container_list():
@@ -40,7 +43,23 @@ def service_tasks_by_id_raw(service_id):
 
 @route('/service/id/<service_id>/tasks')
 def service_tasks_by_id(service_id):
-    cache_key = "service_by_id_%s" % id
+    cache_key = "service_tasks_by_id_%s" % service_id
     return cache_exec(cache_key, service_tasks_by_id_raw, [service_id])
+
+def node_list_raw():
+    return wrap_json([{"nodeID": s[0], "nodeName": s[1], "nodeIP": s[2]} for s in dqs.list_nodes()])
+
+@route('/node/list')
+def node_list():
+    cache_key = "node_list"
+    return cache_exec(cache_key, node_list_raw, [])
+
+def node_containers_by_id_raw(node_id):
+    return wrap_json([wrap_container(c) for c in dqs.get_containers_by_node_id(node_id)])
+
+@route('/node/<node_id>/containers')
+def node_containers_by_id(node_id):
+    cache_key = "node_containers_by_id_%s" % node_id
+    return cache_exec(cache_key, node_containers_by_id_raw, [node_id])
 
 run(host='localhost', port=8080)
