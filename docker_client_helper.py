@@ -13,6 +13,7 @@ class DockerClientHelper:
         key = os.path.join(node_cert_dir, 'key.pem')
         url = "tcp://%s:2376" % ip
 
+        print cert, key 
         tls_config = docker.tls.TLSConfig(
             client_cert=(cert, key)
         )
