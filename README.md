@@ -21,7 +21,7 @@ IP_SWARM_MANAGER = "192.168.99.100"
 docker run \
   -p8080:8080 \
   --env NODE_SWARM_MANAGER=node-1 \
-  --env IP_SWARM_MANAGER=192.168.199.100 \
+  --env IP_SWARM_MANAGER=192.168.99.100 \
   --volume $HOME/.docker/machine/machines:/etc/dsd/machines \
   --detach \
   coder4/swarmdict:1.1
