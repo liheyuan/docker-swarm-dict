@@ -24,5 +24,5 @@ docker run \
   --env IP_SWARM_MANAGER=192.168.199.100 \
   --volume $HOME/.docker/machine/machines:/etc/dsd/machines \
   --detach \
-  swarmdict:latest
+  coder4/swarmdict:1.1
 ```
